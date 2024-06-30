@@ -1,24 +1,32 @@
 {% load static %}
 <!DOCTYPE html>
+{% load i18n %}
 <html>
 <head>
-    <title>Articles</title>
+    <title>{% translate "Articles" %}</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
+    {% get_current_language as LANGUAGE_CODE %}
+    {% get_available_languages as LANGUAGES %}
+    {% get_language_info_list for LANGUAGES as languages %}
     <div class="container">
         <nav class="navbar">
             <div class="navbar-brand">Multilang-site</div>
             <div class="language-selector">
-                <select id="language-dropdown">
-                    <option value="fr">Français</option>
-                    <option value="en">English</option>
-                    <option value="de">Deutsch</option>
-                </select>
+                <form action="{% url 'set_language' %}" method="post">
+                    {% csrf_token %}
+                    <select name="language" onchange="this.form.submit()">
+                        {% for language in languages %}
+                            <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected{% endif %}>{{ language.name_local }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                </form>
             </div>
         </nav>
         <header class="header">
-            <h1>Articles</h1>
+            <h1>{% translate "Articles" %}</h1>
         </header>
         <main class="articles-list">
             <ul>
@@ -27,7 +35,7 @@
                         <div class="article-content hidden">
                             <h2 class="article-title">{{ article.title }}</h2>
                             <p class="article-text">{{ article.content }}</p>
-                            <p class="article-date"><strong>Date de publication :</strong> {{ article.publication_date }}</p>
+                            <p class="article-date"><strong>{% translate "Date de publication" %} :</strong> {{ article.publication_date }}</p>
                         </div>
                     </li>
                 {% endfor %}
